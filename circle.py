@@ -6,12 +6,13 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 class Point:
-    def __init__(self, phase=0.0) -> None:
+    def __init__(self, r=1, phase=0.0) -> None:
+        self.r = r
         self.phase = phase
     
     def get_xypoint(self):
-        temp = [cmath.exp(1j*self.phase).real, 
-                cmath.exp(1j*self.phase).imag]
+        temp = [self.r*cmath.exp(1j*self.phase).real, 
+                self.r*cmath.exp(1j*self.phase).imag]
         return temp
     
     def addphi(self, d_phi):
@@ -34,25 +35,32 @@ class Points(list):
         for i in range(len(self)):
             self[i].addphi(add_phi)
 
-r = 1
-dt = 0.05
+r = 10
+dt = 0.1
 T = 4
+
+dtheta = 2*np.pi/(T/dt)
+numberOfDots = 7
+
 fig, ax = plt.subplots()
 
 points = Points()
-for i in range(100):
-    p = Point(phase=i/(4*np.pi))
+for i in range(numberOfDots):
+    p = Point(r=r, phase=(i/numberOfDots)*2*np.pi)
     points.append(p)
+
 
 frames = []
 for t in range(int(T/dt)):
     x, y = points.get_xylist()
-    line, = ax.plot(x, y, 'ro')
+    line, = ax.plot(x, y, 'bo')
     frames.append([line])
 
-    points.addphi(0.01)
+    print((x[0], y[0]))
 
-anim = animation.ArtistAnimation(fig, frames, interval=dt*1000)
+    points.addphi(dtheta)
+
+anim = animation.ArtistAnimation(fig, frames, interval=dt, repeat=False)
 
 folder = "build"
 filename = "circles.gif"
