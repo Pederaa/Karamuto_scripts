@@ -53,4 +53,13 @@ for t in range(int(T/dt)):
     points.addphi(0.01)
 
 anim = animation.ArtistAnimation(fig, frames, interval=dt*1000)
-anim.save(filename="tmp/circles.gif", writer="pillow")
+
+folder = "build"
+filename = "circles.gif"
+try:
+    anim.save(filename=folder + "/" + filename, writer="pillow")
+except FileNotFoundError:
+    import os
+    os.mkdir(folder)
+
+    anim.save(filename=folder + "/" + filename, writer="pillow")
