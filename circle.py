@@ -1,30 +1,29 @@
-
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 from pointClass import Point, Points
 
-r = 10
-dt = 0.1
-T = 10
+class OneDModel:
+    def __init__(self, r=10, dt=0.1, T=10, numberOfDots=100):
+        self.r = r
+        self.dt = dt
+        self.T = T
+        self.numberOfDots = numberOfDots
 
-dtheta = 2*np.pi/(T/dt)
-numberOfDots = 100
+model = OneDModel(r=10, dt=0.1, T=10, numberOfDots=100)
 
 fig, ax = plt.subplots()
 
 print("Initilizing points ...")
 points = Points()
-for i in range(numberOfDots):
-    p = Point(r=r, phase=(i/numberOfDots)*2*np.pi)
-    points.append(p)
+points.initilize_position(model, type="random")
 
 print("Points intiilized")
 print("Making animation ...")
 
 frames = []
-for t in range(int(T/dt)):
+for t in range(int(model.T/model.dt)):
     x, y = points.get_xylist()
     line, = ax.plot(x, y, 'bo')
     frames.append([line])
@@ -32,7 +31,7 @@ for t in range(int(T/dt)):
     # points.addphi(dtheta)
     points.nextStep()
 
-anim = animation.ArtistAnimation(fig, frames, interval=dt)
+anim = animation.ArtistAnimation(fig, frames, interval=model.dt)
 
 print("Animation completed")
 print("Saving file ...")
@@ -41,7 +40,7 @@ folder = "build"
 filename = "circles.mp4"
 
 def save(filename, anim):
-    anim.save(filename=filename, fps=1/dt)
+    anim.save(filename=filename, fps=1/model.dt)
 
 try:
     save(folder + "/" + filename, anim)

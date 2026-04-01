@@ -1,6 +1,7 @@
 import cmath
 import numpy as np
-
+import random
+import time
 class Point:
     def __init__(self, r=1, phase=0.0) -> None:
         self.r = r
@@ -27,6 +28,22 @@ class Point:
 
 
 class Points(list):
+    def initilize_position(self, model, type="uniform"):
+        match type.lower():
+            case "uniform":
+                # dtheta = 2*np.pi/(model.T/model.dt)
+                for i in range(model.numberOfDots):
+                    p = Point(r=model.r, phase=(i/model.numberOfDots)*2*np.pi)
+                    self.append(p)
+
+            case "random":
+                random.seed(time.time())
+                for i in range(model.numberOfDots):
+                    p = Point(r=model.r, phase=random.random()*2*np.pi)
+                    self.append(p)
+            case _:
+                raise TypeError(f"Unrecognised initial position type: {type}")
+            
     def get_xylist(self):
         x = []
         y = []
