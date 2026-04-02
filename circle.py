@@ -2,6 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
+import matplotlib
+matplotlib.use("Agg")
+
 from pointClass import Point, Points
 
 class OneDModel:
@@ -11,30 +14,35 @@ class OneDModel:
         self.T = T
         self.numberOfDots = numberOfDots
 
-model = OneDModel(r=10, dt=0.03, T=10, numberOfDots=20)
+model = OneDModel(r=5, dt=0.03, T=10, numberOfDots=20)
 
 fig, ax = plt.subplots()
 
 print("Initilizing points ...")
 
 points = Points()
-points.initilize_position(model, type="uniform")
-points.initilze_k(model, type="equal", mu=0, sigma=0.01)
-points.initilize_naturalFrequencies(model, type="random uniform", mu=0.1, sigma=0.1)
+points.initilize_position(model, type="random")
+points.initilze_k(model, type="random gaussian", mu=0.5, sigma=0.01)
+points.initilize_naturalFrequencies(model, type="equal", mu=0.1, sigma=0.1)
 
 print("Points intiilized")
 print("Making animation ...")
 
-frames = []
-for t in range(int(model.T/model.dt)):
-    x, y = points.get_xylist()
-    line, = ax.plot(x, y, 'bo')
-    frames.append([line])
+x, y = points.get_xylist()
+scat = ax.scatter(x, y, c=points.colors, s=50)
+ax.set(xlim=[-model.r*1.1, model.r*1.1], ylim=[-model.r*1.1, model.r*1.1])
 
-    # points.addphi(dtheta)
+def update(frame):
+    ax.clear()
     points.nextStep(model)
+    x, y = points.get_xylist()
+    scat = ax.scatter(x, y, c=points.colors, s=50)
+    ax.set(xlim=[-model.r*1.1, model.r*1.1], ylim=[-model.r*1.1, model.r*1.1])
 
-anim = animation.ArtistAnimation(fig, frames, interval=model.dt)
+    return (scat)
+
+anim = animation.FuncAnimation(fig=fig, func=update, frames=int(model.T/model.dt), interval=model.dt)
+
 
 print("Animation completed")
 print("Saving file ...")
@@ -43,7 +51,7 @@ folder = "build"
 filename = "circles.mp4"
 
 def save(filename, anim):
-    anim.save(filename=filename, fps=1/model.dt)
+    anim.save(filename=filename, fps=int(1/model.dt))
 
 try:
     save(folder + "/" + filename, anim)

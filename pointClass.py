@@ -2,6 +2,10 @@ import cmath
 import numpy as np
 import random
 import time
+
+import matplotlib as mpl
+from matplotlib.colors import LinearSegmentedColormap, ListedColormap
+
 class Point:
     def __init__(self, r=None, phase=None) -> None:
         self.r = r
@@ -19,6 +23,11 @@ class Point:
         self.phase += d_phi
 
 class Points(list):
+    def __init__(self):
+        self.maxFreq = 0
+        self.minFreq = 0
+        self.colors = []
+
     def initilize_position(self, model, type="uniform"):
         match type.lower():
             case "uniform":
@@ -34,6 +43,8 @@ class Points(list):
                     self.append(p)
             case _:
                 raise TypeError(f"Unrecognised initial position type: {type}")
+        
+        self.colors = np.zeros(len(self))
     
     def initilze_k(self, model, type="uniform", mu=None, sigma=None):
         self.K = np.zeros((len(self), len(self)))
@@ -78,7 +89,21 @@ class Points(list):
             case _:
                 raise TypeError(f"Unrecognised initial position type: {type}")
  
-            
+        self.setColorMap()
+    
+    def setColorMap(self):
+        for i in range(len(self)):
+            self.maxFreq = max(self.maxFreq, self[i].naturalFrequency)
+            self.minFreq = min(self.minFreq, self[i].naturalFrequency)
+
+        self.colors = np.zeros((len(self), 4))
+        map = mpl.colormaps['bwr']
+
+        for i in range(len(self)):
+            temp = map((self[i].naturalFrequency + self.minFreq)/(self.maxFreq - self.minFreq))
+            self.colors[i] = temp
+
+
     def get_xylist(self):
         x = []
         y = []
