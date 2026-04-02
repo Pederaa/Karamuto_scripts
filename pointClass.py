@@ -3,7 +3,7 @@ import numpy as np
 import random
 import time
 class Point:
-    def __init__(self, r=1, phase=0.0) -> None:
+    def __init__(self, r=None, phase=None) -> None:
         self.r = r
         self.phase = phase
 
@@ -11,8 +11,8 @@ class Point:
         self.naturalFrequency = 0.02
     
     def get_xypoint(self):
-        temp = [self.r*cmath.exp(1j*self.phase).real, 
-                self.r*cmath.exp(1j*self.phase).imag]
+        temp = [self.r*np.cos(self.phase), 
+                self.r*np.sin(self.phase)]
         return temp
     
     def addphi(self, d_phi):
@@ -35,7 +35,7 @@ class Points(list):
             case _:
                 raise TypeError(f"Unrecognised initial position type: {type}")
     
-    def initilze_k(self, model, type="uniform", mu=1, sigma=1):
+    def initilze_k(self, model, type="uniform", mu=None, sigma=None):
         self.K = np.zeros((len(self), len(self)))
 
         match type.lower():
@@ -55,6 +55,25 @@ class Points(list):
                 for i in range(model.numberOfDots):
                     for j in range(model.numberOfDots):
                         self.K[i][j] = random.gauss(mu, sigma)
+
+            case _:
+                raise TypeError(f"Unrecognised initial position type: {type}")
+ 
+    def initilize_naturalFrequencies(self, model, type="equal", mu=None, sigma=None):
+        match type.lower():
+            case "equal":
+                for i in range(model.numberOfDots):
+                    self[i].naturalFrequency = mu
+
+            case "random uniform":
+                random.seed(time.time())
+                for i in range(model.numberOfDots):
+                    self[i].naturalFrequency = random.random()*mu
+            
+            case "random gaussian":
+                random.seed(time.time())
+                for i in range(model.numberOfDots):
+                    self[i].naturalFrequency = random.gauss(mu, sigma)
 
             case _:
                 raise TypeError(f"Unrecognised initial position type: {type}")

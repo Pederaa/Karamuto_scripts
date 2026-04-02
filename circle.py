@@ -11,14 +11,16 @@ class OneDModel:
         self.T = T
         self.numberOfDots = numberOfDots
 
-model = OneDModel(r=10, dt=0.1, T=10, numberOfDots=100)
+model = OneDModel(r=10, dt=0.03, T=10, numberOfDots=20)
 
 fig, ax = plt.subplots()
 
 print("Initilizing points ...")
+
 points = Points()
-points.initilize_position(model, type="random")
-points.initilze_k(model, type="random gaussian", mu=0.3, sigma=0.01)
+points.initilize_position(model, type="uniform")
+points.initilze_k(model, type="equal", mu=0, sigma=0.01)
+points.initilize_naturalFrequencies(model, type="random uniform", mu=0.1, sigma=0.1)
 
 print("Points intiilized")
 print("Making animation ...")
