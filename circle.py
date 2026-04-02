@@ -18,6 +18,7 @@ fig, ax = plt.subplots()
 print("Initilizing points ...")
 points = Points()
 points.initilize_position(model, type="random")
+points.initilze_k(model, type="random gaussian", mu=0.3, sigma=0.01)
 
 print("Points intiilized")
 print("Making animation ...")
@@ -29,7 +30,7 @@ for t in range(int(model.T/model.dt)):
     frames.append([line])
 
     # points.addphi(dtheta)
-    points.nextStep()
+    points.nextStep(model)
 
 anim = animation.ArtistAnimation(fig, frames, interval=model.dt)
 

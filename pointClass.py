@@ -9,7 +9,6 @@ class Point:
 
         # Karamuto paramaters
         self.naturalFrequency = 0.02
-        self.K = 0.002
     
     def get_xypoint(self):
         temp = [self.r*cmath.exp(1j*self.phase).real, 
@@ -18,14 +17,6 @@ class Point:
     
     def addphi(self, d_phi):
         self.phase += d_phi
-    
-    def nextStepKaramuto(self, allpoints):
-        dphi = self.naturalFrequency
-        for point in allpoints:
-            dphi += self.K*np.sin(point.phase - self.phase)
-
-        self.addphi(dphi)
-
 
 class Points(list):
     def initilize_position(self, model, type="uniform"):
@@ -43,6 +34,31 @@ class Points(list):
                     self.append(p)
             case _:
                 raise TypeError(f"Unrecognised initial position type: {type}")
+    
+    def initilze_k(self, model, type="uniform", mu=1, sigma=1):
+        self.K = np.zeros((len(self), len(self)))
+
+        match type.lower():
+            case "equal":
+                for i in range(model.numberOfDots):
+                    for j in range(model.numberOfDots):
+                        self.K[i][j] = mu
+
+            case "random uniform":
+                random.seed(time.time())
+                for i in range(model.numberOfDots):
+                    for j in range(model.numberOfDots):
+                        self.K[i][j] = random.random()*mu
+            
+            case "random gaussian":
+                random.seed(time.time())
+                for i in range(model.numberOfDots):
+                    for j in range(model.numberOfDots):
+                        self.K[i][j] = random.gauss(mu, sigma)
+
+            case _:
+                raise TypeError(f"Unrecognised initial position type: {type}")
+ 
             
     def get_xylist(self):
         x = []
@@ -59,6 +75,18 @@ class Points(list):
         for i in range(len(self)):
             self[i].addphi(add_phi)
     
-    def nextStep(self):
-        for point in self:
-            point.nextStepKaramuto(self)
+    def nextStep(self, model):
+        for i in range(len(self)):
+            dphi = self[i].naturalFrequency
+
+            for j in range(len(self)):
+                dphi += self.K[i][j]*np.sin(self[i].phase - self[j].phase)
+            
+            self[i].addphi(dphi)
+
+    # def nextStepKaramuto(self, model, allpoints, i):
+    #     dphi = self.naturalFrequency
+    #     for point in allpoints:
+    #         dphi += self.K*np.sin(point.phase - self.phase)
+
+    #     self.addphi(dphi)
